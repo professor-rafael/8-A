@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📢 Central de Recados Rio Branco do Ivaí</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --border-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #recados {
+            background-color: rgba(30, 30, 30, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-height: 200px;
+            max-height: 400px;
+            padding: 15px;
+            margin: 25px 0;
+            text-align: left;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) var(--card-color);
+        }
+
+        #recados::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #recados::-webkit-scrollbar-track {
+            background: var(--card-color);
+        }
+
+        #recados::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .recado {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background-color: rgba(40, 40, 40, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .recado:hover {
+            transform: translateX(5px);
+            background-color: rgba(50, 50, 50, 0.7);
+        }
+
+        .recado strong {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .recado.prefeitura {
+            border-left: 4px solid var(--accent-color);
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+
+        .recado .data {
+            font-size: 0.8rem;
+            color: #888;
+            display: block;
+            margin-top: 5px;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-color), #7c4dff);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(30, 30, 30, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-cancel {
+            background: #333 !important;
+        }
+
+        /* Prompt de comandos - agora fixo na parte inferior */
+        #promptComando {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            padding: 15px 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #inputComando {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        #inputComando::placeholder {
+            color: #666;
+        }
+
+        /* Aviso de comandos */
+        .comando-ajuda {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(30, 30, 30, 0.9);
+            border: 1px solid var(--accent-color);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            z-index: 9998;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .comando-ajuda {
+                bottom: 60px;
+                font-size: 0.7rem;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-bullhorn"></i> Central de Recados</h1>
+
+        <div id="recados"></div>
+
+        <button onclick="abrirModal()">
+            <i class="fas fa-plus"></i> Deixar Novo Recado
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div id="recadoModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-edit"></i> Novo Recado</h2>
+            <div class="form-group">
+                <label for="nome">Seu Nome:</label>
+                <input type="text" id="nome" placeholder="Como devemos te chamar?">
+            </div>
+            <div class="form-group">
+                <label for="recado">Seu Recado:</label>
+                <textarea id="recado" placeholder="Escreva aqui sua mensagem para a cidade..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="fecharModal()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button onclick="deixarRecado()">
+                    <i class="fas fa-paper-plane"></i> Publicar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aviso de comandos -->
+    <div class="comando-ajuda">
+        Digite comandos no prompt abaixo (ex: /ajuda, /limpar, /novo, /prefeitura)
+    </div>
+
+    <!-- Prompt de comandos - agora fixo -->
+    <div id="promptComando">
+        <input type="text" id="inputComando" placeholder="Digite um comando e pressione Enter..." autofocus>
+    </div>
+
+    <script>
+        // Variáveis globais
+        const mensagensPrefeitura = [
+            "Mutirão de limpeza neste sábado na praça central. Participe!",
+            "Inscrições abertas para o programa de empreendedorismo jovem.",
+            "Novo horário de coleta de lixo a partir do próximo mês.",
+            "Reunião do conselho comunitário na próxima terça-feira às 19h."
+        ];
+
+        // Comandos disponíveis
+        const comandos = {
+            "/ajuda": {
+                descricao: "Mostra esta lista de comandos disponíveis",
+                acao: mostrarAjuda
+            },
+            "/limpar": {
+                descricao: "Limpa todos os recados da tela",
+                acao: limparRecados
+            },
+            "/novo": {
+                descricao: "Abre o formulário para novo recado",
+                acao: abrirModal
+            },
+            "/prefeitura": {
+                descricao: "Adiciona um recado aleatório da prefeitura",
+                acao: adicionarRecadoPrefeitura
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarRecados();
+            
+            // Adiciona um recado inicial da prefeitura
+            adicionarRecadoPrefeitura();
+            
+            // Configura o prompt de comandos
+            configurarPromptComandos();
+        });
+
+        // Funções do sistema de recados
+        function abrirModal() {
+            document.getElementById('recadoModal').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('recadoModal').style.display = 'none';
+        }
+
+        function deixarRecado() {
+            const nome = document.getElementById('nome').value.trim();
+            const texto = document.getElementById('recado').value.trim();
+
+            if (nome === '' || texto === '') {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            const recado = {
+                nome: nome,
+                texto: texto,
+                data: new Date().toLocaleString(),
+                prefeitura: false
+            };
+
+            adicionarRecadoTela(recado);
+            salvarRecado(recado);
+            fecharModal();
+            
+            // Limpa os campos
+            document.getElementById('nome').value = '';
+            document.getElementById('recado').value = '';
+        }
+
+        function adicionarRecadoTela(recado) {
+            const recadosDiv = document.getElementById('recados');
+            const recadoElement = document.createElement('div');
+            
+            recadoElement.className = `recado ${recado.prefeitura ? 'prefeitura' : ''}`;
+            recadoElement.innerHTML = `
+                <strong>${recado.prefeitura ? 'Prefeitura Municipal' : recado.nome}</strong>
+                <p>${recado.texto}</p>
+                <span class="data">${recado.data}</span>
+            `;
+            
+            recadosDiv.prepend(recadoElement);
+        }
+
+        function salvarRecado(recado) {
+            let recados = JSON.parse(localStorage.getItem('recados')) || [];
+            recados.unshift(recado);
+            localStorage.setItem('recados', JSON.stringify(recados));
+        }
+
+        function carregarRecados() {
+            const recados = JSON.parse(localStorage.getItem('recados')) || [];
+            const recadosDiv = document.getElementById('recados');
+            recadosDiv.innerHTML = '';
+            
+            recados.forEach(recado => {
+                adicionarRecadoTela(recado);
+            });
+        }
+
+        function limparRecados() {
+            if (confirm('Tem certeza que deseja limpar todos os recados?')) {
+                localStorage.removeItem('recados');
+                document.getElementById('recados').innerHTML = '';
+                mostrarMensagem('Todos os recados foram removidos.');
+            }
+        }
+
+        function adicionarRecadoPrefeitura() {
+            const mensagemAleatoria = mensagensPrefeitura[Math.floor(Math.random() * mensagensPrefeitura.length)];
+            
+            const recado = {
+                nome: 'Prefeitura',
+                texto: mensagemAleatoria,
+                data: new Date().toLocaleString(),
+                prefeitura: true
+            };
+            
+            adicionarRecadoTela(recado);
+            salvarRecado(recado);
+        }
+
+        // Funções do prompt de comandos
+        function configurarPromptComandos() {
+            // Focar automaticamente no prompt
+            document.getElementById('inputComando').focus();
+            
+            // Processar comando ao pressionar Enter
+            document.getElementById('inputComando').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    processarComando(this.value);
+                    this.value = '';
+                }
+            });
+            
+            // Mostrar ajuda ao focar no prompt
+            document.getElementById('inputComando').addEventListener('focus', function() {
+                document.querySelector('.comando-ajuda').style.display = 'block';
+            });
+            
+            // Esconder ajuda ao sair do prompt
+            document.getElementById('inputComando').addEventListener('blur', function() {
+                document.querySelector('.comando-ajuda').style.display = 'none';
+            });
+        }
+
+        function processarComando(comando) {
+            comando = comando.toLowerCase().trim();
+            
+            if (comando === '') return;
+            
+            if (comando in comandos) {
+                comandos[comando].acao();
+            } else if (comando === '/ajuda') {
+                mostrarAjuda();
+            } else {
+                mostrarMensagem(`Comando não reconhecido: ${comando}. Digite /ajuda para ver os comandos disponíveis.`);
+            }
+        }
+
+        function mostrarAjuda() {
+            let mensagemAjuda = "📝 Comandos disponíveis:\n\n";
+            
+            for (const [cmd, info] of Object.entries(comandos)) {
+                mensagemAjuda += `<strong>${cmd}</strong>: ${info.descricao}\n`;
+            }
+            
+            alert(mensagemAjuda);
+        }
+
+        function mostrarMensagem(mensagem) {
+            alert(mensagem);
+        }
+    </script>
+</body>
+</html>
